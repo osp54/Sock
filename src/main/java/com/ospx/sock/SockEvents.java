@@ -1,63 +1,70 @@
 package com.ospx.sock;
 
-import arc.struct.Seq;
-import arc.struct.ObjectMap;
 import arc.func.Cons;
+import arc.struct.ObjectMap;
+import arc.struct.Seq;
 
 /**
  * Copied from {@link arc.Events}
  */
-@SuppressWarnings("unchecked")
 public class SockEvents {
-    private static final ObjectMap<Object, Seq<Cons<?>>> events = new ObjectMap<>();
+    public static final ObjectMap<Object, Seq<Cons<?>>> events = new ObjectMap<>();
 
-    /** Handle an event by class. */
-    public static <T> void on(Class<T> type, Cons<T> listener){
-        events.get(type, () -> new Seq<>(Cons.class)).add(listener);
+    /**
+     * Handle an event by class.
+     */
+    public static <T> void on(Class<T> type, Cons<T> listener) {
+        events.get(type, Seq::new).add(listener);
     }
 
-    /** Handle an event by enum trigger. */
-    public static void run(Object type, Runnable listener){
-        events.get(type, () -> new Seq<>(Cons.class)).add(e -> listener.run());
+    /**
+     * Handle an event by enum.
+     */
+    public static void run(Object type, Runnable listener) {
+        events.get(type, Seq::new).add(event -> listener.run());
     }
 
-    /** Only use this method if you have the reference to the exact listener object that was used. */
-    public static <T> boolean remove(Class<T> type, Cons<T> listener){
-        return events.get(type, () -> new Seq<>(Cons.class)).remove(listener);
+    /**
+     * Remove an event by index.
+     */
+    public static <T> Cons<?> remove(Class<T> type, int index) {
+        return events.get(type, Seq::new).remove(index);
     }
 
-    /** Fires an enum trigger. */
-    public static <T extends Enum<T>> void fire(Enum<T> type){
-        Seq<Cons<?>> listeners = events.get(type);
-
-        if(listeners != null){
-            int len = listeners.size;
-            Cons[] items = listeners.items;
-            for(int i = 0; i < len; i++){
-                items[i].get(type);
-            }
-        }
+    /**
+     * Remove an event by reference.
+     */
+    public static <T> boolean remove(Class<T> type, Cons<T> listener) {
+        return events.get(type, Seq::new).remove(listener);
     }
 
-    /** Fires a non-enum event by class. */
-    public static <T> void fire(T type){
-        fire(type.getClass(), type);
+    /**
+     * Fires an event by enum.
+     */
+    public static <T extends Enum<T>> void fire(Enum<T> value) {
+        fire(value, value);
     }
 
-    public static <T> void fire(Class<?> ctype, T type){
-        Seq<Cons<?>> listeners = events.get(ctype);
-
-        if(listeners != null){
-            int len = listeners.size;
-            Cons[] items = listeners.items;
-            for(int i = 0; i < len; i++){
-                items[i].get(type);
-            }
-        }
+    /**
+     * Fires an event by value.
+     */
+    public static <T> void fire(T value) {
+        fire(value.getClass(), value);
     }
 
-    /** Don't do this. */
-    public static void clear(){
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T> void fire(Object type, T value) {
+        var listeners = events.get(type);
+        if (listeners == null) return;
+
+        for (Cons cons : listeners)
+            cons.get(value);
+    }
+
+    /**
+     * Clears all event listeners. Don't do this.
+     */
+    public static void clear() {
         events.clear();
     }
 }

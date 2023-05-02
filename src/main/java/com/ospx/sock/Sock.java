@@ -7,8 +7,8 @@ import java.io.IOException;
 
 public class Sock {
     public EndPoint socket;
-
     public Mode mode;
+
     public static Sock client(String ip, int port) throws IOException {
         return new Sock(ip, port, Mode.CLIENT);
     }
@@ -37,7 +37,7 @@ public class Sock {
         }
     }
 
-    public <T extends SockEvent> void sendEvent(T event) {
+    public <T> void sendEvent(T event) {
 
     }
 
@@ -45,6 +45,7 @@ public class Sock {
         SockEvents.on(TestEvent.class, e -> {
             Log.info(e.name);
         });
+
         Sock server = Sock.server(2000);
         Sock client = Sock.client("127.0.01", 2000);
 
