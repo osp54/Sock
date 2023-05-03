@@ -24,7 +24,13 @@ public interface Sock {
         server.connect();
         client.connect();
 
-        SockEvents.on(String.class, Log::info);
+        SockEvents.on(String.class, text -> {
+            Log.info("Received text: @", text);
+
+            client.disconnect();
+            server.disconnect();
+        });
+
         client.send("Hello world!");
     }
 }

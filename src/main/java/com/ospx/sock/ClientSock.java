@@ -29,7 +29,7 @@ public class ClientSock implements Sock {
     @Override
     @SneakyThrows
     public void disconnect() {
-        client.dispose();
+        client.close();
     }
 
     @Override
@@ -41,12 +41,12 @@ public class ClientSock implements Sock {
 
         @Override
         public void connected(Connection connection) {
-            Log.info("[Sock] Connected to Sock server @.", connection.getRemoteAddressTCP());
+            Log.info("[Sock] Connected to Sock server @. (@)", connection.getID(), connection.getRemoteAddressTCP());
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock] Disconnected from Sock server @ due to @", connection.getRemoteAddressTCP(), reason);
+            Log.info("[Sock] Disconnected from Sock server @ due to @", connection.getID(), reason);
         }
 
         @Override
