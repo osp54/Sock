@@ -1,5 +1,6 @@
 package com.ospx.sock;
 
+import arc.func.Cons;
 import arc.net.Client;
 import arc.net.Connection;
 import arc.net.DcReason;
@@ -8,6 +9,7 @@ import arc.util.Log;
 import lombok.SneakyThrows;
 
 public class ClientSock implements Sock {
+    public final EventBus bus = new EventBus();
 
     public final Client client;
     public final int port;
@@ -33,8 +35,14 @@ public class ClientSock implements Sock {
     }
 
     @Override
-    public void send(Object object) {
+    public void sendEvent(Object object) {
+        bus.fire(object);
         client.sendTCP(object);
+    }
+
+    @Override
+    public <T> void onEvent(Class<T> type, Cons<T> consumer) {
+        bus.on(type, consumer);
     }
 
     public class ClientSockListener implements NetListener {
@@ -51,7 +59,7 @@ public class ClientSock implements Sock {
 
         @Override
         public void received(Connection connection, Object object) {
-            SockEvents.fire(object);
+            bus.fire(object);
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.ospx.sock;
 
+import arc.func.Cons;
 import arc.util.Log;
 
 public interface Sock {
-
     static Sock client(int port) {
         return new ClientSock(port);
     }
@@ -15,22 +15,19 @@ public interface Sock {
     void connect();
     void disconnect();
 
-    void send(Object object);
+    void sendEvent(Object object);
+    <T> void onEvent(Class<T> type, Cons<T> consumer);
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         var server = Sock.server(2000);
         var client = Sock.client(2000);
 
         server.connect();
         client.connect();
 
-        SockEvents.on(String.class, text -> {
-            Log.info("Received text: @", text);
+        server.onEvent(String.class, Log::info);
+        //client.onEvent(String.class, Log::info);
 
-            client.disconnect();
-            server.disconnect();
-        });
-
-        client.send("Hello world!");
+        client.sendEvent("Hello world!");
     }
 }
