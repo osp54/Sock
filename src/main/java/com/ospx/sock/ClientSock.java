@@ -10,14 +10,20 @@ import lombok.SneakyThrows;
 
 public class ClientSock implements Sock {
     public final EventBus bus = new EventBus();
-
     public final Client client;
+
+    public final String ip;
     public final int port;
 
     public ClientSock(int port) {
+        this("localhost", port);
+    }
+
+    public ClientSock(String ip, int port) {
         this.client = new Client(32768, 16384, new PacketSerializer());
         this.client.addListener(new ClientSockListener());
 
+        this.ip = ip;
         this.port = port;
     }
 
@@ -25,7 +31,7 @@ public class ClientSock implements Sock {
     @SneakyThrows
     public void connect() {
         client.start();
-        client.connect(3000, "localhost", port);
+        client.connect(3000, ip, port);
     }
 
     @Override
@@ -41,8 +47,13 @@ public class ClientSock implements Sock {
     }
 
     @Override
-    public <T> void onEvent(Class<T> type, Cons<T> consumer) {
-        bus.on(type, consumer);
+    public <T> void onEvent(Class<T> type, Cons<T> cons) {
+        bus.on(type, cons);
+    }
+
+    @Override
+    public boolean isConnected() {
+        return client.isConnected();
     }
 
     public class ClientSockListener implements NetListener {
