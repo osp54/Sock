@@ -34,8 +34,8 @@ public interface Sock {
     }
 
     static void main(String[] args) {
-        var server = Sock.server(2000);
-        var client = Sock.client(2000);
+        Sock server = Sock.server(2000);
+        Sock client = Sock.client(2000);
 
         server.connect();
         client.connect();

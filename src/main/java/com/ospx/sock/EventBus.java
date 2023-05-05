@@ -54,7 +54,7 @@ public class EventBus {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> void fire(Object type, T value) {
-        var listeners = events.get(type);
+        Seq<Cons<?>> listeners = events.get(type);
         if (listeners == null) return;
 
         for (Cons cons : listeners)
