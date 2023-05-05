@@ -9,7 +9,7 @@ publishing {
             name = "Sock"
             url = uri("https://maven.pkg.github.com/osp54/Sock")
             credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                username = "osp54"
                 password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
             }
         }
