@@ -4,8 +4,13 @@ import arc.func.Cons;
 import arc.util.Log;
 
 public interface Sock {
+
     static Sock client(int port) {
         return new ClientSock(port);
+    }
+
+    static Sock client(String ip, int port) {
+        return new ClientSock(ip, port);
     }
 
     static Sock server(int port) {
@@ -16,7 +21,17 @@ public interface Sock {
     void disconnect();
 
     void sendEvent(Object object);
-    <T> void onEvent(Class<T> type, Cons<T> consumer);
+    <T> void onEvent(Class<T> type, Cons<T> cons);
+
+    boolean isConnected();
+
+    default boolean isServer() {
+        return this instanceof ServerSock;
+    }
+
+    default boolean isClient() {
+        return this instanceof ClientSock;
+    }
 
     static void main(String[] args) {
         var server = Sock.server(2000);
@@ -26,7 +41,7 @@ public interface Sock {
         client.connect();
 
         server.onEvent(String.class, Log::info);
-        //client.onEvent(String.class, Log::info);
+        client.onEvent(String.class, Log::info);
 
         client.sendEvent("Hello world!");
     }

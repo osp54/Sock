@@ -10,8 +10,8 @@ import lombok.SneakyThrows;
 
 public class ServerSock implements Sock {
     public final EventBus bus = new EventBus();
-
     public final Server server;
+
     public final int port;
 
     public ServerSock(int port) {
@@ -36,13 +36,18 @@ public class ServerSock implements Sock {
 
     @Override
     public void sendEvent(Object object) {
+        bus.fire(object);
         server.sendToAllTCP(object);
     }
 
     @Override
-    public <T> void onEvent(Class<T> type, Cons<T> consumer) {
-        bus.fire(type, consumer);
-        bus.on(type, consumer);
+    public <T> void onEvent(Class<T> type, Cons<T> cons) {
+        bus.on(type, cons);
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
     }
 
     public class ServerSockListener implements NetListener {
