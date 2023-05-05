@@ -3,27 +3,22 @@ plugins {
     id("maven-publish")
 }
 
+group = "com.github.osp54"
+version = "0.9"
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
-    repositories {
-        maven {
-            name = "Sock"
-            url = uri("https://maven.pkg.github.com/osp54/Sock")
-            credentials {
-                username = "osp54"
-                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-            }
-        }
-    }
     publications {
-        register<MavenPublication>("gpr") {
-            artifactId = "sock"
+        register("release", MavenPublication::class) {
             from(components["java"])
+            artifactId = "sock"
         }
     }
 }
-
-group = "com.ospx"
-version = "0.9"
 
 repositories {
     mavenCentral()
