@@ -11,8 +11,8 @@ jobs:
       contents: read
       packages: write
     steps:
-      - run: chmod +x ./gradlew
       - uses: actions/checkout@v3
+      - run: chmod +x gradlew
       - uses: actions/setup-java@v3
         with:
           java-version: '11'
