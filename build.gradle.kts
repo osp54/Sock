@@ -6,7 +6,7 @@ plugins {
 publishing {
     repositories {
         maven {
-            name = "sock"
+            name = "Sock"
             url = uri("https://maven.pkg.github.com/osp54/Sock")
             credentials {
                 username = "osp54"
@@ -16,6 +16,7 @@ publishing {
     }
     publications {
         register<MavenPublication>("gpr") {
+            artifactId = "sock"
             from(components["java"])
         }
     }
