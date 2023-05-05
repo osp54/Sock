@@ -6,7 +6,7 @@ plugins {
 publishing {
     repositories {
         maven {
-            name = "Sock"
+            name = "sock"
             url = uri("https://maven.pkg.github.com/osp54/Sock")
             credentials {
                 username = "osp54"
