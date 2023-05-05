@@ -22,7 +22,7 @@ publishing {
 }
 
 group = "com.ospx"
-version = "1.0-SNAPSHOT"
+version = "0.9"
 
 repositories {
     mavenCentral()
@@ -30,8 +30,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Anuken.Arc:arc-core:v143")
-    compileOnly("com.github.Anuken.Arc:arcnet:v143")
+    compileOnly("com.github.anuken.arc:arc-core:v143")
+    compileOnly("com.github.anuken.arc:arcnet:v143")
 
     api("com.esotericsoftware:kryo:5.4.0")
 
