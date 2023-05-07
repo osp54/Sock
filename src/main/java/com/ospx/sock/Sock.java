@@ -3,37 +3,48 @@ package com.ospx.sock;
 import arc.func.Cons;
 import arc.util.Log;
 
-public interface Sock {
+public abstract class Sock {
 
-    static Sock client(int port) {
+    public static Sock client(int port) {
         return new ClientSock(port);
     }
 
-    static Sock client(String ip, int port) {
+    public static Sock client(String ip, int port) {
         return new ClientSock(ip, port);
     }
 
-    static Sock server(int port) {
+    public static Sock server(int port) {
         return new ServerSock(port);
     }
 
-    void connect();
-    void disconnect();
+    public final EventBus bus = new EventBus();
 
-    void sendEvent(Object object);
-    <T> void onEvent(Class<T> type, Cons<T> cons);
+    public abstract void connect();
+    public abstract void disconnect();
 
-    boolean isConnected();
+    public abstract void sendEvent(Object object);
 
-    default boolean isServer() {
+    public <T> void onEvent(T type, Runnable runnable) {
+        bus.on(type, runnable);
+    }
+
+    public <T> void onEvent(Class<T> type, Cons<T> cons) {
+        bus.on(type, cons);
+    }
+
+    public boolean isConnected() {
+        return true;
+    }
+
+    public boolean isServer() {
         return this instanceof ServerSock;
     }
 
-    default boolean isClient() {
+    public boolean isClient() {
         return this instanceof ClientSock;
     }
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         Sock server = Sock.server(2000);
         Sock client = Sock.client(2000);
 

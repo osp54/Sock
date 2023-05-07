@@ -30,10 +30,10 @@ public class PacketSerializer implements NetSerializer {
     @SuppressWarnings("unchecked")
     public Object read(ByteBuffer buffer) {
         try (ByteBufferInput input = new ByteBufferInput(buffer)) {
-            Registration type = kryo.readClass(input);
-            if (type == null) return null;
+            var registration = kryo.readClass(input);
+            if (registration == null) return null;
 
-            return kryo.readObject(input, type.getType());
+            return kryo.readObject(input, registration.getType());
         }
     }
 }
