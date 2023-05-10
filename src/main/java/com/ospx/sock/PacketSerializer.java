@@ -1,9 +1,8 @@
 package com.ospx.sock;
 
-import arc.net.FrameworkMessage;
+import arc.net.FrameworkMessage.RegisterTCP;
 import arc.net.NetSerializer;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import org.objenesis.strategy.StdInstantiatorStrategy;
@@ -21,7 +20,7 @@ public class PacketSerializer implements NetSerializer {
 
     @Override
     public void write(ByteBuffer buffer, Object object) {
-        try (ByteBufferOutput output = new ByteBufferOutput(buffer)) {
+        try (var output = new ByteBufferOutput(buffer)) {
             kryo.writeClass(output, object.getClass());
             kryo.writeObject(output, object);
         }
@@ -30,15 +29,11 @@ public class PacketSerializer implements NetSerializer {
     @Override
     @SuppressWarnings("unchecked")
     public Object read(ByteBuffer buffer) {
+        var duplicate = buffer.duplicate();
+        if (duplicate.get() == -2)
+            return register(duplicate);
 
-        var d = buffer.duplicate();
-        byte id = d.get();
-
-        if (id == -2) {
-            return register(d);
-        }
-
-        try (ByteBufferInput input = new ByteBufferInput(buffer)) {
+        try (var input = new ByteBufferInput(buffer)) {
             var registration = kryo.readClass(input);
             if (registration == null) return null;
 
@@ -47,13 +42,10 @@ public class PacketSerializer implements NetSerializer {
     }
 
     public Object register(ByteBuffer buffer) {
-        byte id = buffer.get();
-        if (id == 4) {
-            FrameworkMessage.RegisterTCP p = new FrameworkMessage.RegisterTCP();
-            p.connectionID = buffer.getInt();
-            return p;
-        }else{
-            return null;
-        }
+        if (buffer.get() == 4)
+            return new RegisterTCP() {{
+                connectionID = buffer.getInt();
+            }};
+        else return null;
     }
 }

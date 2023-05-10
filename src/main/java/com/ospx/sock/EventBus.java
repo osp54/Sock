@@ -13,6 +13,7 @@ public class EventBus {
     public <T> void on(T type, Runnable listener) {
         events.get(type, Seq::new).add(event -> listener.run());
     }
+
     public <T> void on(Class<T> type, Cons<T> listener) {
         events.get(type, Seq::new).add(listener);
     }
