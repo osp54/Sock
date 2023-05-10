@@ -34,7 +34,7 @@ public class PacketSerializer implements NetSerializer {
         var d = buffer.duplicate();
         byte id = d.get();
 
-        if(id == -2){
+        if (id == -2) {
             return register(d);
         }
 
@@ -46,9 +46,14 @@ public class PacketSerializer implements NetSerializer {
         }
     }
 
-    public Object register(ByteBuffer buffer){
-        FrameworkMessage.RegisterTCP p = new FrameworkMessage.RegisterTCP();
-        p.connectionID = buffer.getInt();
-        return p;
+    public Object register(ByteBuffer buffer) {
+        byte id = buffer.get();
+        if (id == 4) {
+            FrameworkMessage.RegisterTCP p = new FrameworkMessage.RegisterTCP();
+            p.connectionID = buffer.getInt();
+            return p;
+        }else{
+            return null;
+        }
     }
 }
