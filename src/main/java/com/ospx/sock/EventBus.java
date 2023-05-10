@@ -3,6 +3,7 @@ package com.ospx.sock;
 import arc.func.Cons;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
+import arc.util.Log;
 
 /**
  * Copied from {@link arc.Events}
@@ -37,11 +38,15 @@ public class EventBus {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> void fire(Object type, T value) {
-        Seq<Cons<?>> listeners = events.get(type);
+        var listeners = events.get(type);
         if (listeners == null) return;
 
         for (Cons cons : listeners)
-            cons.get(value);
+            try {
+                cons.get(value);
+            } catch (Exception e) {
+                Log.err(e);
+            }
     }
 
     public void clear() {
