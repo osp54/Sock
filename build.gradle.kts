@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.anuken.arc:arc-core:v143")
-    implementation("com.github.anuken.arc:arcnet:v143")
+    compileOnlyApi("com.github.anuken.arc:arc-core:v143")
+    compileOnlyApi("com.github.anuken.arc:arcnet:v143")
 
     api("com.esotericsoftware:kryo:5.4.0")
 
