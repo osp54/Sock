@@ -34,7 +34,6 @@ public class PacketSerializer implements NetSerializer {
     public Object read(ByteBuffer buffer) {
 
         var d = buffer.array();
-        Log.info(Arrays.toString(d));
         if (d[0] == 0&&(d[1] >=0&&d[1] <=4)) {
             return readFramework(buffer);
         }

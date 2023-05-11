@@ -63,7 +63,7 @@ public class ClientSock extends Sock {
 
         @Override
         public void received(Connection connection, Object object) {
-            Log.info(">>>"+object.getClass());
+            Log.debug(">>>"+object.getClass());
             bus.fire(object);
         }
     }
