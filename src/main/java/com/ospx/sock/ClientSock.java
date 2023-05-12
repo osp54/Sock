@@ -5,13 +5,18 @@ import arc.net.Connection;
 import arc.net.DcReason;
 import arc.net.NetListener;
 import arc.util.Log;
+import arc.util.Threads;
 import lombok.SneakyThrows;
+
+import java.nio.channels.ClosedSelectorException;
 
 public class ClientSock extends Sock {
 
     public final Client client;
     public final String ip;
     public final int port;
+
+    public Thread thread;
 
     public ClientSock(int port) {
         this("localhost", port);
@@ -28,8 +33,15 @@ public class ClientSock extends Sock {
     @Override
     @SneakyThrows
     public void connect() {
-        client.start();
-        client.connect(5000, ip, port);
+        thread = Threads.daemon("Sock Client", () -> {
+            try{
+                client.run();
+            }catch(Throwable e){
+                if(!(e instanceof ClosedSelectorException)) Log.err(e);
+            }
+        });
+
+        client.connect(1000, ip, port);
     }
 
     @Override

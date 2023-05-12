@@ -45,15 +45,6 @@ public abstract class Sock {
     }
 
     public static void main(String[] args) {
-        Sock server = Sock.server(2000);
         Sock client = Sock.client(2000);
-
-        server.connect();
-        client.connect();
-
-        server.onEvent(String.class, Log::info);
-        client.onEvent(String.class, Log::info);
-
-        client.sendEvent("Hello world!");
     }
 }
