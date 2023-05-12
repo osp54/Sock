@@ -46,7 +46,7 @@ public class PacketSerializer implements NetSerializer {
             try (ByteBufferInput input = new ByteBufferInput(buffer)) {
                 var registration = kryo.readClass(input);
                 if (registration == null) return null;
-                Log.info("<<< "+registration.getType().getName());
+                Log.debug("<<< "+registration.getType().getName());
                 return kryo.readObject(input, registration.getType());
             }
         }
@@ -81,7 +81,6 @@ public class PacketSerializer implements NetSerializer {
         }else if(id == 1){
             return FrameworkMessage.discoverHost;
         }else if(id == 2){
-            Log.info("KeepAlive");
             return FrameworkMessage.keepAlive;
         }else if(id == 3){
             RegisterUDP p = new RegisterUDP();
