@@ -16,10 +16,8 @@ public class ServerSock extends Sock {
     public final int port;
 
 
-    public Thread thread;
-
     public ServerSock(int port) {
-        this.server = new Server(32768, 16384, new PacketSerializer());
+        this.server = new Server(32768, 16384, this.getPacketSerializer());
         this.port = port;
 
         this.server.addListener(new ServerSockListener());
@@ -29,7 +27,7 @@ public class ServerSock extends Sock {
     @SneakyThrows
     public void connect() {
         server.bind(port);
-        thread = Threads.daemon("Sock Server", () -> {
+        this.thread = Threads.daemon("Sock Server", () -> {
             try{
                 server.run();
             }catch(Throwable e){

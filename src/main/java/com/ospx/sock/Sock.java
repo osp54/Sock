@@ -1,10 +1,8 @@
 package com.ospx.sock;
 
 import arc.func.Cons;
-import arc.util.Log;
 
 public abstract class Sock {
-
     public static Sock client(int port) {
         return new ClientSock(port);
     }
@@ -17,6 +15,8 @@ public abstract class Sock {
         return new ServerSock(port);
     }
 
+    protected final PacketSerializer packetSerializer = new PacketSerializer();
+    public Thread thread;
     public final EventBus bus = new EventBus();
 
     public abstract void connect();
@@ -44,6 +44,9 @@ public abstract class Sock {
         return this instanceof ClientSock;
     }
 
+    public PacketSerializer getPacketSerializer() {
+        return packetSerializer;
+    }
     public static void main(String[] args) {
         Sock client = Sock.client(2000);
     }

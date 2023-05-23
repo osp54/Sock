@@ -13,12 +13,16 @@ import arc.net.FrameworkMessage.*;
 import java.nio.ByteBuffer;
 
 public class PacketSerializer implements NetSerializer {
-    public final Kryo kryo = new Kryo();
+    private final Kryo kryo = new Kryo();
 
     public PacketSerializer() {
         kryo.setAutoReset(true);
         kryo.setRegistrationRequired(false);
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+    }
+
+    public Kryo getKryo() {
+        return kryo;
     }
 
     @Override

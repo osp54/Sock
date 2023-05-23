@@ -11,19 +11,16 @@ import lombok.SneakyThrows;
 import java.nio.channels.ClosedSelectorException;
 
 public class ClientSock extends Sock {
-
     public final Client client;
     public final String ip;
     public final int port;
-
-    public Thread thread;
 
     public ClientSock(int port) {
         this("localhost", port);
     }
 
     public ClientSock(String ip, int port) {
-        this.client = new Client(32768, 16384, new PacketSerializer());
+        this.client = new Client(32768, 16384, this.getPacketSerializer());
         this.ip = ip;
         this.port = port;
 
@@ -33,7 +30,7 @@ public class ClientSock extends Sock {
     @Override
     @SneakyThrows
     public void connect() {
-        thread = Threads.daemon("Sock Client", () -> {
+        this.thread = Threads.daemon("Sock Client", () -> {
             try{
                 client.run();
             }catch(Throwable e){
@@ -59,6 +56,11 @@ public class ClientSock extends Sock {
     @Override
     public boolean isConnected() {
         return client.isConnected();
+    }
+
+    @Override
+    public PacketSerializer getPacketSerializer() {
+        return packetSerializer;
     }
 
     public class ClientSockListener implements NetListener {
