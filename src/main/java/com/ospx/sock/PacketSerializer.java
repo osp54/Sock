@@ -3,28 +3,17 @@ package com.ospx.sock;
 import arc.net.FrameworkMessage;
 import arc.net.NetSerializer;
 import arc.util.Log;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.ByteBufferInput;
-import com.esotericsoftware.kryo.io.ByteBufferOutput;
-import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import arc.net.FrameworkMessage.*;
+import com.alibaba.fastjson.JSON;
 
 import java.nio.ByteBuffer;
 
 public class PacketSerializer implements NetSerializer {
-    private final Kryo kryo = new Kryo();
-
-    public PacketSerializer() {
-        kryo.setAutoReset(true);
-        kryo.setRegistrationRequired(false);
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+    private final EventBus bus;
+    public PacketSerializer(EventBus bus) {
+        this.bus = bus;
     }
-
-    public Kryo getKryo() {
-        return kryo;
-    }
-
     @Override
     public void write(ByteBuffer buffer, Object object) {
         if(object instanceof FrameworkMessage m){
@@ -32,10 +21,11 @@ public class PacketSerializer implements NetSerializer {
             writeFramework(buffer,m);
         }else {
             buffer.put((byte) -1);
-            try (ByteBufferOutput output = new ByteBufferOutput(buffer)) {
-                kryo.writeClass(output, object.getClass());
-                kryo.writeObject(output, object);
-            }
+            writeString(buffer, object.getClass().getName());
+
+            byte[] json = JSON.toJSONBytes(object);
+            buffer.putInt(json.length);
+            buffer.put(json);
         }
     }
 
@@ -47,16 +37,43 @@ public class PacketSerializer implements NetSerializer {
         if (type==-2){
             return readFramework(buffer);
         }else{
-            try (ByteBufferInput input = new ByteBufferInput(buffer)) {
-                var registration = kryo.readClass(input);
-                if (registration == null) return null;
-                Log.debug("<<< "+registration.getType().getName());
-                return kryo.readObject(input, registration.getType());
+            String classString = readString(buffer);
+
+            try {
+                Class<?> clazz = Class.forName(classString);
+
+                if (!bus.contains(clazz)) {
+                    bypassReadLimit(buffer);
+                    return null;
+                }
+
+                int jsonLength = buffer.getInt();
+
+                byte[] jsonBytes = new byte[jsonLength];
+                buffer.get(jsonBytes);
+
+                return JSON.parseObject(jsonBytes, clazz);
+            } catch (ClassNotFoundException e) {
+                Log.err("[Sock] Not found class " + classString, e);
+                bypassReadLimit(buffer);
+                return null;
             }
         }
     }
 
-    public void writeFramework(ByteBuffer buffer, FrameworkMessage message){
+    private void writeString(ByteBuffer buffer, String string) {
+        buffer.putInt(string.length());
+        buffer.put(string.getBytes());
+    }
+    private String readString(ByteBuffer buffer) {
+        int length = buffer.getInt();
+        byte[] bytes = new byte[length];
+        buffer.get(bytes);
+
+        return new String(bytes);
+    }
+
+    private void writeFramework(ByteBuffer buffer, FrameworkMessage message){
         if(message instanceof Ping p){
             buffer.put((byte)0);
             buffer.putInt(p.id);
@@ -74,7 +91,7 @@ public class PacketSerializer implements NetSerializer {
         }
     }
 
-    public FrameworkMessage readFramework(ByteBuffer buffer){
+    private FrameworkMessage readFramework(ByteBuffer buffer){
         byte id = buffer.get();
 
         if(id == 0){
@@ -97,5 +114,9 @@ public class PacketSerializer implements NetSerializer {
         }else{
             throw new RuntimeException("Unknown framework message!");
         }
+    }
+
+    private void bypassReadLimit(ByteBuffer buffer) {
+        buffer.position(buffer.position() + buffer.remaining());
     }
 }

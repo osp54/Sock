@@ -15,9 +15,9 @@ public abstract class Sock {
         return new ServerSock(port);
     }
 
-    protected final PacketSerializer packetSerializer = new PacketSerializer();
     public Thread thread;
     public final EventBus bus = new EventBus();
+    protected final PacketSerializer packetSerializer = new PacketSerializer(bus);
 
     public abstract void connect();
     public abstract void disconnect();
@@ -48,6 +48,10 @@ public abstract class Sock {
         return packetSerializer;
     }
     public static void main(String[] args) {
+        Sock server = Sock.server(2000);
         Sock client = Sock.client(2000);
+
+        server.connect();
+        client.connect();
     }
 }
