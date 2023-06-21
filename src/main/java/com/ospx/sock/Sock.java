@@ -1,5 +1,7 @@
 package com.ospx.sock;
 
+import com.ospx.sock.EventBus.Subscription;
+
 import arc.func.Cons;
 
 public abstract class Sock {
@@ -24,12 +26,12 @@ public abstract class Sock {
 
     public abstract void sendEvent(Object object);
 
-    public <T> void onEvent(T type, Runnable runnable) {
-        bus.on(type, runnable);
+    public <T> Subscription<T> onEvent(T type, Runnable runnable) {
+        return bus.on(type, runnable);
     }
 
-    public <T> void onEvent(Class<T> type, Cons<T> cons) {
-        bus.on(type, cons);
+    public <T> Subscription<T> onEvent(Class<T> type, Cons<T> cons) {
+        return bus.on(type, cons);
     }
 
     public boolean isConnected() {
