@@ -4,36 +4,44 @@ import arc.func.Cons;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Log;
+import arc.util.Time;
+import arc.util.Timer;
 
 public class EventBus {
-    private final ObjectMap<Object, Seq<Cons<?>>> events = new ObjectMap<>();
+    private final ObjectMap<Object, Seq<Subscription<? extends Object>>> events = new ObjectMap<>();
+
+    public EventBus() {
+        Timer.schedule(this::clearExpired, 0.100f, 0.100f);
+    }
 
     public <T> Subscription<T> on(T type, Runnable listener) {
-        Seq<Cons<?>> listeners = events.get(type);
+        Seq<Subscription<?>> listeners = events.get(type);
         if (listeners == null) {
             listeners = new Seq<>();
             events.put(type, listeners);
         }
 
         Cons<?> cons = event -> listener.run();
-        listeners.add(cons);
-        return new Subscription<>(listeners, cons);
+        Subscription<?> subscription = new Subscription<>(listeners, cons);
+        listeners.add(subscription);
+        return (Subscription<T>) subscription;
     }
 
     public <T> Subscription<T> on(Class<T> type, Cons<T> listener) {
-        Seq<Cons<?>> listeners = events.get(type);
+        Seq<Subscription<?>> listeners = events.get(type);
         if (listeners == null) {
             listeners = new Seq<>();
             events.put(type, listeners);
         }
 
-        listeners.add(listener);
-        return new Subscription<>(listeners, listener);
+        Subscription<?> subscription = new Subscription<>(listeners, listener);
+        listeners.add(subscription);
+        return (Subscription<T>) subscription;
     }
 
     public <T> boolean unsubscribe(Subscription<T> subscription) {
-        Seq<Cons<?>> listeners = subscription.getListeners();
-        Cons<?> listener = subscription.getListener();
+        Seq<Subscription<?>> listeners = subscription.getListeners();
+        Subscription<?> listener = (Subscription<?>) subscription.getListener();
         return listeners != null && listener != null && listeners.remove(listener);
     }
 
@@ -46,14 +54,15 @@ public class EventBus {
         fire(value.getClass(), value);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked" })
     public <T> void fire(Object type, T value) {
-        Seq<Cons<?>> listeners = events.get(type);
-        if (listeners == null) return;
+        Seq<Subscription<?>> listeners = events.get(type);
+        if (listeners == null)
+            return;
 
-        for (Cons cons : listeners) {
+        for (Subscription<?> subscription : listeners) {
             try {
-                cons.get(value);
+                ((Cons<T>) subscription.getListener()).get(value);
             } catch (Exception e) {
                 Log.err(e);
             }
@@ -64,26 +73,55 @@ public class EventBus {
         events.clear();
     }
 
-    public static class Subscription<T> {
-        private final Seq<Cons<?>> listeners;
-        private final Cons<?> listener;
+    public void clearExpired() {
+        for (var subcribers : events.values()) {
+            for (var subscriber : subcribers) {
+                if (subscriber.expired()) {
+                    subscriber.onExpire.run();
+                    subscriber.unsubscribe();
+                }
+            }
+        }
+    }
 
-        Subscription(Seq<Cons<?>> listeners, Cons<?> listener) {
+    public static class Subscription<T> {
+        private final Seq<Subscription<? extends Object>> listeners;
+        private final Cons<T> listener;
+
+        private long expireAt = -1L;
+        private Runnable onExpire;
+
+        Subscription(Seq<Subscription<?>> listeners, Cons<T> listener) {
             this.listeners = listeners;
             this.listener = listener;
         }
 
-        Seq<Cons<?>> getListeners() {
+        Seq<Subscription<?>> getListeners() {
             return listeners;
         }
 
-        Cons<?> getListener() {
+        Cons<T> getListener() {
             return listener;
+        }
+
+        public Subscription<T> expireAfter(long ms) {
+            return expireAfter(ms, () -> {
+            });
+        }
+
+        public Subscription<T> expireAfter(long ms, Runnable onExpire) {
+            this.expireAt = Time.millis() + ms;
+            this.onExpire = onExpire;
+            return this;
+        }
+
+        public boolean expired() {
+            return expireAt != -1 && Time.millis() >= expireAt;
         }
 
         public void unsubscribe() {
             if (listeners != null && listener != null) {
-                listeners.remove(listener);
+                listeners.remove(this);
             }
         }
     }
