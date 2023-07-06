@@ -2,4 +2,6 @@
 /.gradle/
 /build/
 /build/classes/java/main/
-/src/main/java/com/ospx/sock/Test.java
+/.idea/
+/bin/
+/.vscode/

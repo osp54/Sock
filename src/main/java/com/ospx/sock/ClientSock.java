@@ -24,7 +24,7 @@ public class ClientSock extends Sock {
         this.ip = ip;
         this.port = port;
 
-        this.client.addListener(new ClientSockListener());
+        this.client.addListener(new MainThreadListener(new ClientSockListener()));
     }
 
     @Override

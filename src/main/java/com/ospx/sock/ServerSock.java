@@ -1,5 +1,6 @@
 package com.ospx.sock;
 
+import arc.Core;
 import arc.net.Connection;
 import arc.net.DcReason;
 import arc.net.NetListener;
@@ -15,12 +16,11 @@ public class ServerSock extends Sock {
     public final Server server;
     public final int port;
 
-
     public ServerSock(int port) {
         this.server = new Server(32768, 16384, this.getPacketSerializer());
         this.port = port;
 
-        this.server.addListener(new ServerSockListener());
+        this.server.addListener(new MainThreadListener(new ServerSockListener()));
     }
 
     @Override
@@ -28,10 +28,11 @@ public class ServerSock extends Sock {
     public void connect() {
         server.bind(port);
         this.thread = Threads.daemon("Sock Server", () -> {
-            try{
+            try {
                 server.run();
-            }catch(Throwable e){
-                if(!(e instanceof ClosedSelectorException)) Log.err(e);
+            } catch (Throwable e) {
+                if (!(e instanceof ClosedSelectorException))
+                    Log.err(e);
             }
         });
     }
