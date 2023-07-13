@@ -2,14 +2,17 @@ package com.ospx.sock;
 
 import arc.func.Cons;
 import arc.mock.MockApplication;
+import arc.util.*;
 import com.ospx.sock.EventBus.Subscription;
+import lombok.Getter;
 
 import static arc.Core.*;
 
+@Getter
 public abstract class Sock {
 
-    public final EventBus bus = new EventBus();
-    public final PacketSerializer serializer = new PacketSerializer(bus);
+    public final EventBus bus = new EventBus(this);
+    public final PacketSerializer serializer = new PacketSerializer(this);
 
     public static ClientSock client(int port) {
         return new ClientSock(port);
@@ -28,7 +31,16 @@ public abstract class Sock {
         server.connect();
         client.connect();
 
-        while (true) {}
+        server.on("nya", () -> Log.info("ne nya")).withTimeout(5, () -> {
+            Log.info("timeout");
+        });
+
+        Timer.schedule(() -> {
+            client.send("nya");
+        }, 0, 1, 30);
+
+        while (true) {
+        }
     }
 
     public abstract void connect();

@@ -9,9 +9,10 @@ import lombok.Getter;
 @SuppressWarnings("unchecked")
 public class EventBus {
     private final ObjectMap<Class<?>, Seq<Subscription<?>>> events = new ObjectMap<>();
+    private final Sock sock;
 
-    public EventBus() {
-        Timer.schedule(this::clearExpired, .1f, .1f);
+    public EventBus(Sock sock) {
+        this.sock = sock;
     }
 
     public <T> Subscription<T> on(T value, Runnable listener) {
@@ -46,45 +47,25 @@ public class EventBus {
         events.clear();
     }
 
-    public void clearExpired() {
-        for (var subscriptions : events.values()) {
-            subscriptions.each(Subscription::expired, subscription -> {
-                if (subscription.unsubscribe()) {
-                    var expired = subscription.getExpired();
-                    if (expired == null) return;
-
-                    expired.run();
-                }
-            });
-        }
-    }
-
     @Getter
     public static class Subscription<T>  {
         private final Seq<Subscription<?>> listeners;
         private final Cons<T> listener;
-
-        private long expireAt = -1L;
-        private Runnable expired;
 
         Subscription(Seq<Subscription<?>> listeners, Cons<T> listener) {
             this.listeners = listeners;
             this.listener = listener;
         }
 
-        public Subscription<T> withTimeout(long timeout) {
-            this.expireAt = Time.millis() + timeout;
-            return this;
+        public void withTimeout(float seconds) {
+            Timer.schedule(this::unsubscribe, seconds);
         }
 
-        public Subscription<T> withTimeout(long timeout, Runnable expired) {
-            this.expireAt = Time.millis() + timeout;
-            this.expired = expired;
-            return this;
-        }
-
-        public boolean expired() {
-            return expireAt >= 0 && Time.millis() >= expireAt;
+        public void withTimeout(float seconds, Runnable expired) {
+            Timer.schedule(() -> {
+                if (unsubscribe())
+                    expired.run();
+            }, seconds);
         }
 
         public boolean unsubscribe() {

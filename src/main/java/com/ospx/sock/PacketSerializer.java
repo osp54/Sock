@@ -3,10 +3,17 @@ package com.ospx.sock;
 import arc.net.*;
 import arc.net.FrameworkMessage.*;
 import com.alibaba.fastjson.JSON;
+import lombok.Getter;
 
 import java.nio.ByteBuffer;
 
-public record PacketSerializer(EventBus bus) implements NetSerializer {
+@Getter
+public class PacketSerializer implements NetSerializer {
+    private final Sock sock;
+
+    public PacketSerializer(Sock sock) {
+        this.sock = sock;
+    }
 
     @Override
     public void write(ByteBuffer buffer, Object value) {
@@ -86,7 +93,7 @@ public record PacketSerializer(EventBus bus) implements NetSerializer {
             var type = Class.forName(readString(buffer));
 
             // the current Sock isn't even subscribed to this class, ignore
-            if (!bus.contains(type)) {
+            if (!sock.getBus().contains(type)) {
                 skipRemaining(buffer);
                 return null;
             }

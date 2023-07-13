@@ -54,12 +54,12 @@ public class ServerSock extends Sock {
                 return;
             }
 
-            Log.info("[Sock Server] @ has connected.", connection.getRemoteAddressTCP());
+            Log.info("[Sock Server] Client @ has connected. (@)", connection.getID(), connection.getRemoteAddressTCP());
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock Server] @ has disconnected. (@)", connection.getRemoteAddressTCP(), reason);
+            Log.info("[Sock Server] Client @ has disconnected. (@)", connection.getID(), reason);
         }
 
         @Override

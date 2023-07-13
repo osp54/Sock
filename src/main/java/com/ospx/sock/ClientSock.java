@@ -54,12 +54,12 @@ public class ClientSock extends Sock {
     public class ClientSockListener implements NetListener {
         @Override
         public void connected(Connection connection) {
-            Log.info("[Sock Client] Connected to @.", connection.getRemoteAddressTCP());
+            Log.info("[Sock Client] Connected to server @. (@)", connection.getID(), connection.getRemoteAddressTCP());
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock Client] Disconnected from @. (@)", connection.getRemoteAddressTCP(), reason);
+            Log.info("[Sock Client] Disconnected from server @. (@)", connection.getRemoteAddressTCP(), reason);
         }
 
         @Override
