@@ -1,18 +1,20 @@
 package com.ospx.sock;
 
 import arc.func.Cons;
+import arc.net.FrameworkMessage;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.Timer.Task;
-import lombok.Getter;
+import lombok.*;
+
+import java.util.UUID;
 
 @Getter
 @SuppressWarnings("unchecked")
 public class EventBus {
-    private static int lastRequestID = 0;
     private final Sock sock;
 
-    private final IntMap<RequestSubscription<?>> requests = new IntMap<>();
+    private final ObjectMap<String, RequestSubscription<?>> requests = new ObjectMap<>();
     private final ObjectMap<Class<?>, Seq<EventSubscription<?>>> events = new ObjectMap<>();
 
     public EventBus(Sock sock) {
@@ -38,18 +40,20 @@ public class EventBus {
     }
 
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener) {
-        var subscription = new RequestSubscription<>(request.id, listener);
-        requests.put(request.id, subscription);
+        var subscription = new RequestSubscription<>(request.uuid, listener);
+        requests.put(request.uuid, subscription);
 
         return subscription;
     }
 
     public <T> void fire(T value) {
+        if (value instanceof FrameworkMessage) return;
+
         if (value instanceof Response response) {
-            var subscription = requests.remove(response.id);
+            var subscription = requests.get(response.uuid);
             if (subscription == null) return;
 
-            ((Cons<T>) subscription.listener).get(value);
+            subscription.call(value);
             return;
         }
 
@@ -57,7 +61,7 @@ public class EventBus {
         if (listeners == null) return;
 
         for (var subscription : listeners)
-            ((Cons<T>) subscription.listener).get(value);
+            subscription.call(value);
     }
 
     public boolean contains(Class<?> type) {
@@ -75,9 +79,15 @@ public class EventBus {
     public abstract static class Subscription<T> {
         protected @Nullable Task task;
 
+        public abstract void call(Object value);
+
         public Subscription<T> withTimeout(float seconds) {
             this.task = Timer.schedule(this::unsubscribe, seconds);
             return this;
+        }
+
+        public Subscription<T> withTimeout(Runnable expired) {
+            return withTimeout(3f, expired);
         }
 
         public Subscription<T> withTimeout(float seconds, Runnable expired) {
@@ -103,9 +113,19 @@ public class EventBus {
         }
 
         @Override
+        public void call(Object value) {
+            listener.get((T) value);
+        }
+
+        @Override
         public EventSubscription<T> withTimeout(float seconds) {
             super.withTimeout(seconds);
             return this;
+        }
+
+        @Override
+        public EventSubscription<T> withTimeout(Runnable expired) {
+            return withTimeout(3f, expired);
         }
 
         @Override
@@ -125,18 +145,30 @@ public class EventBus {
 
     @Getter
     public class RequestSubscription<T extends Response> extends Subscription<T> {
-        private final int id;
+        private final String uuid;
         private final Cons<T> listener;
 
-        RequestSubscription(int id, Cons<T> listener) {
-            this.id = id;
+        public int responses;
+
+        RequestSubscription(String uuid, Cons<T> listener) {
+            this.uuid = uuid;
             this.listener = listener;
+        }
+
+        @Override
+        public void call(Object value) {
+            responses++;
+            listener.get((T) value);
         }
 
         @Override
         public RequestSubscription<T> withTimeout(float seconds) {
             super.withTimeout(seconds);
             return this;
+        }
+
+        public RequestSubscription<T> withTimeout(Runnable expired) {
+            return withTimeout(3f, expired);
         }
 
         @Override
@@ -150,22 +182,23 @@ public class EventBus {
             if (task != null && task.isScheduled())
                 task.cancel(); // Cancel the expiration task just in case
 
-            return requests.remove(id) != null;
+            return requests.remove(uuid) != null && responses == 0;
         }
     }
 
     @Getter
     public abstract static class Request<T extends Response> {
-        private final int id = lastRequestID++;
+        public String uuid;
+
+        public Request() {
+            this.uuid = UUID.randomUUID().toString();
+        }
     }
 
     @Getter
+    @Setter
     public abstract static class Response {
-        private final int id;
-
-        public Response(Request<?> request) {
-            this.id = request.id;
-        }
+        private String uuid;
     }
 
     // endregion

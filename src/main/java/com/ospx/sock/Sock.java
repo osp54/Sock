@@ -19,7 +19,6 @@ public abstract class Sock {
     }
 
     public abstract void connect();
-
     public abstract void disconnect();
 
     public abstract void send(Object object);
@@ -47,7 +46,10 @@ public abstract class Sock {
     }
 
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired) {
-        return request(request, listener, expired, 3f);
+        var subscription = bus.request(request, listener).withTimeout(expired);
+        send(request);
+
+        return subscription;
     }
 
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired, float seconds) {
@@ -55,6 +57,11 @@ public abstract class Sock {
         send(request);
 
         return subscription;
+    }
+
+    public <T extends Response> void respond(Request<T> request, T response) {
+        response.setUuid(request.getUuid());
+        send(response);
     }
 
     public boolean isConnected() {

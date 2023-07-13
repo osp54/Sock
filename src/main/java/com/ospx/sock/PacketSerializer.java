@@ -3,6 +3,7 @@ package com.ospx.sock;
 import arc.net.*;
 import arc.net.FrameworkMessage.*;
 import com.alibaba.fastjson.JSON;
+import com.ospx.sock.EventBus.*;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -93,7 +94,7 @@ public class PacketSerializer implements NetSerializer {
             var type = Class.forName(readString(buffer));
 
             // the current Sock isn't even subscribed to this class, ignore
-            if (!sock.getBus().contains(type)) {
+            if (!(Response.class.isAssignableFrom(type) || sock.getBus().contains(type))) {
                 skipRemaining(buffer);
                 return null;
             }
@@ -102,7 +103,7 @@ public class PacketSerializer implements NetSerializer {
             buffer.get(bytes);
 
             return JSON.parseObject(bytes, type);
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
             skipRemaining(buffer);
             return null;
         }
