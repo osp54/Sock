@@ -1,27 +1,18 @@
 package com.ospx.sock;
 
-import arc.net.Client;
-import arc.net.Connection;
-import arc.net.DcReason;
-import arc.net.NetListener;
-import arc.util.Log;
-import arc.util.Threads;
-import lombok.SneakyThrows;
+import arc.net.*;
+import arc.util.*;
+import lombok.*;
 
 import java.nio.channels.ClosedSelectorException;
 
+@Getter
 public class ClientSock extends Sock {
-    public final Client client;
-    public final String ip;
-    public final int port;
+    private final Client client;
+    private final int port;
 
     public ClientSock(int port) {
-        this("localhost", port);
-    }
-
-    public ClientSock(String ip, int port) {
-        this.client = new Client(32768, 16384, this.getPacketSerializer());
-        this.ip = ip;
+        this.client = new Client(32768, 16384, serializer);
         this.port = port;
 
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
@@ -30,15 +21,17 @@ public class ClientSock extends Sock {
     @Override
     @SneakyThrows
     public void connect() {
-        this.thread = Threads.daemon("Sock Client", () -> {
-            try{
+        Threads.daemon("Sock Client", () -> {
+            try {
                 client.run();
-            }catch(Throwable e){
-                if(!(e instanceof ClosedSelectorException)) Log.err(e);
+            } catch (ClosedSelectorException e) {
+                // ignore
+            } catch (Throwable e) {
+                Log.err(e);
             }
         });
 
-        client.connect(1000, ip, port);
+        client.connect(1000, "localhost", port);
     }
 
     @Override
@@ -48,7 +41,7 @@ public class ClientSock extends Sock {
     }
 
     @Override
-    public void sendEvent(Object object) {
+    public void send(Object object) {
         bus.fire(object);
         client.sendTCP(object);
     }
@@ -58,26 +51,19 @@ public class ClientSock extends Sock {
         return client.isConnected();
     }
 
-    @Override
-    public PacketSerializer getPacketSerializer() {
-        return packetSerializer;
-    }
-
     public class ClientSockListener implements NetListener {
-
         @Override
         public void connected(Connection connection) {
-            Log.info("[Sock] Connected to Sock server @. (@)", connection.getID(), connection.getRemoteAddressTCP());
+            Log.info("[Sock Client] Connected to @.", connection.getRemoteAddressTCP());
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock] Disconnected from Sock server @ due to @", connection.getID(), reason);
+            Log.info("[Sock Client] Disconnected from @. (@)", connection.getRemoteAddressTCP(), reason);
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            Log.debug(">>>"+object.getClass());
             bus.fire(object);
         }
     }

@@ -1,9 +1,11 @@
 package com.ospx.sock;
 
-import arc.Core;
 import arc.net.NetListener;
+import arc.net.NetListener.QueuedListener;
 
-public class MainThreadListener extends NetListener.QueuedListener {
+import static arc.Core.*;
+
+public class MainThreadListener extends QueuedListener {
 
     public MainThreadListener(NetListener listener) {
         super(listener);
@@ -11,7 +13,6 @@ public class MainThreadListener extends NetListener.QueuedListener {
 
     @Override
     protected void queue(Runnable runnable) {
-        Core.app.post(runnable);
+        app.post(runnable);
     }
-    
 }

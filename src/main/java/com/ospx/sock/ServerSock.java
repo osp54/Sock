@@ -1,23 +1,18 @@
 package com.ospx.sock;
 
-import arc.Core;
-import arc.net.Connection;
-import arc.net.DcReason;
-import arc.net.NetListener;
-import arc.net.Server;
-import arc.util.Log;
-import arc.util.Threads;
-import lombok.SneakyThrows;
+import arc.net.*;
+import arc.util.*;
+import lombok.*;
 
 import java.nio.channels.ClosedSelectorException;
 
+@Getter
 public class ServerSock extends Sock {
-
     public final Server server;
     public final int port;
 
     public ServerSock(int port) {
-        this.server = new Server(32768, 16384, this.getPacketSerializer());
+        this.server = new Server(32768, 16384, serializer);
         this.port = port;
 
         this.server.addListener(new MainThreadListener(new ServerSockListener()));
@@ -26,15 +21,17 @@ public class ServerSock extends Sock {
     @Override
     @SneakyThrows
     public void connect() {
-        server.bind(port);
-        this.thread = Threads.daemon("Sock Server", () -> {
+        Threads.daemon("Sock Server", () -> {
             try {
                 server.run();
+            } catch (ClosedSelectorException e) {
+                // ignore
             } catch (Throwable e) {
-                if (!(e instanceof ClosedSelectorException))
-                    Log.err(e);
+                Log.err(e);
             }
         });
+
+        server.bind(port);
     }
 
     @Override
@@ -44,13 +41,12 @@ public class ServerSock extends Sock {
     }
 
     @Override
-    public void sendEvent(Object object) {
+    public void send(Object object) {
         bus.fire(object);
         server.sendToAllTCP(object);
     }
 
     public class ServerSockListener implements NetListener {
-
         @Override
         public void connected(Connection connection) {
             if (!connection.getRemoteAddressTCP().getAddress().isLoopbackAddress()) {
@@ -58,12 +54,12 @@ public class ServerSock extends Sock {
                 return;
             }
 
-            Log.info("[Sock] Sock client @ has connected. (@)", connection.getID(), connection.getRemoteAddressTCP());
+            Log.info("[Sock Server] @ has connected.", connection.getRemoteAddressTCP());
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock] Sock client @ has disconnected due to @.", connection.getID(), reason);
+            Log.info("[Sock Server] @ has disconnected. (@)", connection.getRemoteAddressTCP(), reason);
         }
 
         @Override

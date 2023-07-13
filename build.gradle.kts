@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.osp54"
-version = "0.9"
+version = "1.0"
 
 java {
     withSourcesJar()
@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.anuken.arc:arc-core:v143")
-    compileOnly("com.github.anuken.arc:arcnet:v143")
+    implementation("com.github.anuken.arc:arc-core:v145")
+    implementation("com.github.anuken.arc:arcnet:v145")
 
     implementation("com.alibaba:fastjson:2.0.32")
 
