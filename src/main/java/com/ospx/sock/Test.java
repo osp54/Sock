@@ -11,7 +11,7 @@ public class Test {
     public static final ServerSock server = Sock.server(Mathf.random(9999));
     public static final ClientSock client = Sock.client(server.getPort());
 
-    public static void main(String... args) throws Exception {
+    public static void main(String... args) {
         app = new MockApplication();
 
         server.connect();
@@ -26,23 +26,9 @@ public class Test {
             Log.info("Received!");
         });
 
-        client.run("aaa", () -> {});
-        server.send("aaa");
-
         while (true) {}
     }
 
-    public static class Test1 extends Request<Test2> {
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + ": " + getUuid();
-        }
-    }
-
-    public static class Test2 extends Response {
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + ": " + getUuid();
-        }
-    }
+    public static class Test1 extends Request<Test2> {}
+    public static class Test2 extends Response {}
 }
