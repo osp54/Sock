@@ -59,7 +59,7 @@ public class ClientSock extends Sock {
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock Client] Disconnected from server @. (@)", connection.getRemoteAddressTCP(), reason);
+            Log.info("[Sock Client] Disconnected from server @. (@)", connection.getID(), reason);
         }
 
         @Override

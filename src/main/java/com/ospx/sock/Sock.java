@@ -1,12 +1,8 @@
 package com.ospx.sock;
 
 import arc.func.Cons;
-import arc.mock.MockApplication;
-import arc.util.*;
-import com.ospx.sock.EventBus.Subscription;
+import com.ospx.sock.EventBus.*;
 import lombok.Getter;
-
-import static arc.Core.*;
 
 @Getter
 public abstract class Sock {
@@ -22,39 +18,43 @@ public abstract class Sock {
         return new ServerSock(port);
     }
 
-    public static void main(String[] args) {
-        app = new MockApplication();
-
-        var server = Sock.server(2000);
-        var client = Sock.client(2000);
-
-        server.connect();
-        client.connect();
-
-        server.on("nya", () -> Log.info("ne nya")).withTimeout(5, () -> {
-            Log.info("timeout");
-        });
-
-        Timer.schedule(() -> {
-            client.send("nya");
-        }, 0, 1, 30);
-
-        while (true) {
-        }
-    }
-
     public abstract void connect();
 
     public abstract void disconnect();
 
     public abstract void send(Object object);
 
-    public <T> Subscription<T> on(T type, Runnable runnable) {
-        return bus.on(type, runnable);
+    public <T> EventSubscription<T> run(T value, Runnable listener) {
+        return bus.run(value, listener);
     }
 
-    public <T> Subscription<T> on(Class<T> type, Cons<T> cons) {
-        return bus.on(type, cons);
+    public <T> EventSubscription<T> on(Class<T> type, Cons<T> listener) {
+        return bus.on(type, listener);
+    }
+
+    public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener) {
+        var subscription = bus.request(request, listener);
+        send(request);
+
+        return subscription;
+    }
+
+    public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, float seconds) {
+        var subscription = bus.request(request, listener).withTimeout(seconds);
+        send(request);
+
+        return subscription;
+    }
+
+    public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired) {
+        return request(request, listener, expired, 3f);
+    }
+
+    public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired, float seconds) {
+        var subscription = bus.request(request, listener).withTimeout(seconds, expired);
+        send(request);
+
+        return subscription;
     }
 
     public boolean isConnected() {
