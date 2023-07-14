@@ -39,7 +39,7 @@ jar {
     doFirst {
         configurations.runtimeClasspath.each { file ->
             def dependencyNotation = dependencies.create(file.absolutePath)
-            if (dependencyNotation.group == 'com.github.anuken') {
+            if (dependencyNotation.group == "com.github.anuken") {
                 dependencies.remove(dependencyNotation)
                 compileOnly dependencyNotation
             }
