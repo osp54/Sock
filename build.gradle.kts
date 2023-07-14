@@ -34,3 +34,15 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")
 }
+
+jar {
+    doFirst {
+        configurations.runtimeClasspath.each { file ->
+            def dependencyNotation = dependencies.create(file.absolutePath)
+            if (dependencyNotation.group == 'com.github.anuken') {
+                dependencies.remove(dependencyNotation)
+                compileOnly dependencyNotation
+            }
+        }
+    }
+}
