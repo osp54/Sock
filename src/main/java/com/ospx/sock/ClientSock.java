@@ -21,12 +21,15 @@ public class ClientSock extends Sock {
     private Task reconnectTask;
 
     public ClientSock(int port) {
-        this.client = new Client(32768, 16384, serializer);
+        this.client = new Client(32768, 16384, getSerializer());
         this.port = port;
 
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
     }
 
+    /**
+     * @implNote connects to the server on a specified por
+     */
     @Override
     @SneakyThrows
     public void connect() {
@@ -52,6 +55,9 @@ public class ClientSock extends Sock {
         client.connect(1000, "localhost", port);
     }
 
+    /**
+     * @implNote disconnects from the server
+     */
     @Override
     @SneakyThrows
     public void disconnect() {
@@ -59,10 +65,13 @@ public class ClientSock extends Sock {
         if (reconnectTask != null) reconnectTask.cancel();
     }
 
+    /**
+     * @implNote fires all listeners, then sends an object to the server
+     */
     @Override
-    public void send(Object object) {
-        bus.fire(object);
-        if (isConnected()) client.sendTCP(object);
+    public void send(Object value) {
+        getBus().fire(value);
+        if (isConnected()) client.sendTCP(value);
     }
 
     @Override
@@ -83,7 +92,7 @@ public class ClientSock extends Sock {
 
         @Override
         public void received(Connection connection, Object object) {
-            bus.fire(object);
+            getBus().fire(object);
         }
     }
 }

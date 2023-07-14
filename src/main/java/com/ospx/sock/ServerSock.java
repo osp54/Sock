@@ -12,12 +12,15 @@ public class ServerSock extends Sock {
     public final int port;
 
     public ServerSock(int port) {
-        this.server = new Server(32768, 16384, serializer);
+        this.server = new Server(32768, 16384, getSerializer());
         this.port = port;
 
         this.server.addListener(new MainThreadListener(new ServerSockListener()));
     }
 
+    /**
+     * @implNote binds the server to a specified port
+     */
     @Override
     @SneakyThrows
     public void connect() {
@@ -34,16 +37,22 @@ public class ServerSock extends Sock {
         server.bind(port);
     }
 
+    /**
+     * @implNote closes all connections, then stops the server
+     */
     @Override
     @SneakyThrows
     public void disconnect() {
         server.close();
     }
 
+    /**
+     * @implNote fires all listeners, then sends an object to all clients
+     */
     @Override
-    public void send(Object object) {
-        bus.fire(object);
-        if (isConnected()) server.sendToAllTCP(object);
+    public void send(Object value) {
+        getBus().fire(value);
+        if (isConnected()) server.sendToAllTCP(value);
     }
 
     public class ServerSockListener implements NetListener {
@@ -64,7 +73,7 @@ public class ServerSock extends Sock {
 
         @Override
         public void received(Connection connection, Object object) {
-            bus.fire(object);
+            getBus().fire(object);
             server.sendToAllExceptTCP(connection.getID(), object);
         }
     }
