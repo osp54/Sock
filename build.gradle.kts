@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.anuken.arc:arc-core:v145")
-    compileOnly("com.github.anuken.arc:arcnet:v145")
+    implementation("com.github.anuken.arc:arc-core:v145")
+    implementation("com.github.anuken.arc:arcnet:v145")
 
     implementation("com.alibaba:fastjson:2.0.32")
 

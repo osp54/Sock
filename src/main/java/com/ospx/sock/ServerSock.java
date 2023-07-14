@@ -43,7 +43,7 @@ public class ServerSock extends Sock {
     @Override
     public void send(Object object) {
         bus.fire(object);
-        server.sendToAllTCP(object);
+        if (isConnected()) server.sendToAllTCP(object);
     }
 
     public class ServerSockListener implements NetListener {

@@ -2,6 +2,7 @@ package com.ospx.sock;
 
 import arc.math.Mathf;
 import arc.mock.MockApplication;
+import arc.net.DcReason;
 import arc.util.Log;
 import com.ospx.sock.EventBus.*;
 
@@ -25,6 +26,8 @@ public class Test {
         client.request(new Test1(), test2 -> {
             Log.info("Received!");
         });
+
+        server.getServer().getConnections()[0].close(DcReason.timeout);
 
         while (true) {}
     }
