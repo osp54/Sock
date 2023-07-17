@@ -29,9 +29,13 @@ public class Test {
 
         server.getServer().getConnections()[0].close(DcReason.timeout);
 
-        while (true) {}
+        while (true) {
+        }
     }
 
-    public static class Test1 extends Request<Test2> {}
-    public static class Test2 extends Response {}
+    public static class Test1 extends Request<Test2> {
+    }
+
+    public static class Test2 extends Response {
+    }
 }

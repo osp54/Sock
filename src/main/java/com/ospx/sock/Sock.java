@@ -10,8 +10,10 @@ public abstract class Sock {
     private final EventBus bus = new EventBus(this);
     private final PacketSerializer serializer = new PacketSerializer(this);
 
-    /** Creates a new instance of Sock
-     * @param port - the port to which this Sock will connect
+    /**
+     * Creates a new instance of Sock
+     *
+     * @param port   - the port to which this Sock will connect
      * @param server - if true, creates ServerSock, otherwise ClientSock
      * @return a new instance of Sock
      */
@@ -19,7 +21,9 @@ public abstract class Sock {
         return server ? server(port) : client(port);
     }
 
-    /** Creates a new instance of ClientSock
+    /**
+     * Creates a new instance of ClientSock
+     *
      * @param port - the port to which this ClientSock will connect
      * @return a new instance of ClientSock
      */
@@ -27,7 +31,9 @@ public abstract class Sock {
         return new ClientSock(port);
     }
 
-    /** Creates a new instance of ServerSock
+    /**
+     * Creates a new instance of ServerSock
+     *
      * @param port - the port on which this ServerSock will bind
      * @return a new instance of ServerSock
      */
@@ -47,13 +53,15 @@ public abstract class Sock {
 
     /**
      * Sends an object across the Sock network
+     *
      * @param value the object to be sent
      */
     public abstract void send(Object value);
 
     /**
      * Subscribes this Sock to a value listener
-     * @param value a value to subscribe
+     *
+     * @param value    a value to subscribe
      * @param listener a listener to be called when this value is received
      * @return a subscription which can be unsubscribed or time limited
      */
@@ -63,7 +71,8 @@ public abstract class Sock {
 
     /**
      * Subscribes this Sock to a class listener
-     * @param type a class to subscribe
+     *
+     * @param type     a class to subscribe
      * @param listener a listener to be called when an object of this class is received
      * @return a subscription which can be unsubscribed or time limited
      */
@@ -73,7 +82,8 @@ public abstract class Sock {
 
     /**
      * Creates a response subscription and sends a request across the Sock network
-     * @param request a request to be sent
+     *
+     * @param request  a request to be sent
      * @param listener a listener to be called when any response to this request is received
      * @return a subscription which can be unsubscribed or time limited
      */
@@ -86,9 +96,10 @@ public abstract class Sock {
 
     /**
      * Creates a response subscription and sends a request across the Sock network
-     * @param request a request to be sent
+     *
+     * @param request  a request to be sent
      * @param listener a listener to be called when any response to this request is received
-     * @param seconds the number of seconds after which this request will expire
+     * @param seconds  the number of seconds after which this request will expire
      * @return a subscription which can be unsubscribed or time limited
      */
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, float seconds) {
@@ -100,9 +111,10 @@ public abstract class Sock {
 
     /**
      * Creates a response subscription and sends a request across the Sock network
-     * @param request a request to be sent
+     *
+     * @param request  a request to be sent
      * @param listener a listener to be called when any response to this request is received
-     * @param expired a listener to be called if no response is received for a certain time
+     * @param expired  a listener to be called if no response is received for a certain time
      * @return a subscription which can be unsubscribed or time limited
      */
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired) {
@@ -114,10 +126,11 @@ public abstract class Sock {
 
     /**
      * Creates a response subscription and sends a request across the Sock network
-     * @param request a request to be sent
+     *
+     * @param request  a request to be sent
      * @param listener a listener to be called when any response to this request is received
-     * @param seconds the number of seconds after which this request will expire
-     * @param expired a listener to be called if no response is received for a certain time
+     * @param seconds  the number of seconds after which this request will expire
+     * @param expired  a listener to be called if no response is received for a certain time
      * @return a subscription which can be unsubscribed or time limited
      */
     public <T extends Response> RequestSubscription<T> request(Request<T> request, Cons<T> listener, Runnable expired, float seconds) {
@@ -129,7 +142,8 @@ public abstract class Sock {
 
     /**
      * Responds to a request across the Sock network
-     * @param request a request to be responded
+     *
+     * @param request  a request to be responded
      * @param response a response to be sent
      */
     public <T extends Response> void respond(Request<T> request, T response) {

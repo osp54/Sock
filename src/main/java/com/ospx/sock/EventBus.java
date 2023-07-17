@@ -103,6 +103,21 @@ public class EventBus {
     }
 
     @Getter
+    public abstract static class Request<T extends Response> {
+        public String uuid;
+
+        public Request() {
+            this.uuid = UUID.randomUUID().toString();
+        }
+    }
+
+    @Getter
+    @Setter
+    public abstract static class Response {
+        private String uuid;
+    }
+
+    @Getter
     public class EventSubscription<T> extends Subscription<T> {
         protected final Class<T> type;
         protected final Cons<T> listener;
@@ -184,21 +199,6 @@ public class EventBus {
 
             return requests.remove(uuid) != null && responses == 0;
         }
-    }
-
-    @Getter
-    public abstract static class Request<T extends Response> {
-        public String uuid;
-
-        public Request() {
-            this.uuid = UUID.randomUUID().toString();
-        }
-    }
-
-    @Getter
-    @Setter
-    public abstract static class Response {
-        private String uuid;
     }
 
     // endregion

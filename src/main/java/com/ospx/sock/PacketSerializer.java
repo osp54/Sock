@@ -3,7 +3,7 @@ package com.ospx.sock;
 import arc.net.*;
 import arc.net.FrameworkMessage.*;
 import com.alibaba.fastjson.JSON;
-import com.ospx.sock.EventBus.*;
+import com.ospx.sock.EventBus.Response;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;

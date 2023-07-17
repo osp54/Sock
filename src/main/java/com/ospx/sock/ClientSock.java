@@ -1,15 +1,9 @@
 package com.ospx.sock;
 
-import arc.net.Client;
-import arc.net.Connection;
-import arc.net.DcReason;
-import arc.net.NetListener;
-import arc.util.Log;
-import arc.util.Threads;
-import arc.util.Timer;
+import arc.net.*;
+import arc.util.*;
 import arc.util.Timer.Task;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 
 import java.nio.channels.ClosedSelectorException;
 
@@ -50,9 +44,9 @@ public class ClientSock extends Sock {
             } catch (Throwable e) {
                 Log.err(e);
             }
-        }, 1f, 1f);
+        }, 5f, 1f);
 
-        client.connect(1000, "localhost", port);
+        client.connect(5000, "localhost", port);
     }
 
     /**
