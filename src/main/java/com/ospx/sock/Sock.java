@@ -130,7 +130,6 @@ public abstract class Sock {
 
     /**
      * @return whether this Sock instance is connected
-     * @implNote the ServerSock is always connected, even if {@link Sock#connect()} wasn't called before
      */
     public boolean isConnected() {
         return true;

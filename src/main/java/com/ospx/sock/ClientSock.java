@@ -28,7 +28,7 @@ public class ClientSock extends Sock {
     }
 
     /**
-     * @implNote connects to the server on a specified por
+     * Connects to the server on a specified port
      */
     @Override
     @SneakyThrows
@@ -56,7 +56,7 @@ public class ClientSock extends Sock {
     }
 
     /**
-     * @implNote disconnects from the server
+     * Disconnects from the server
      */
     @Override
     @SneakyThrows
@@ -66,7 +66,7 @@ public class ClientSock extends Sock {
     }
 
     /**
-     * @implNote fires all listeners, then sends an object to the server
+     * Fires all listeners, then sends an object to the server
      */
     @Override
     public void send(Object value) {

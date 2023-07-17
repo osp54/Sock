@@ -19,7 +19,7 @@ public class ServerSock extends Sock {
     }
 
     /**
-     * @implNote binds the server to a specified port
+     * Binds the server to a specified port
      */
     @Override
     @SneakyThrows
@@ -38,7 +38,7 @@ public class ServerSock extends Sock {
     }
 
     /**
-     * @implNote closes all connections, then stops the server
+     * Closes all connections, then stops the server
      */
     @Override
     @SneakyThrows
@@ -47,12 +47,19 @@ public class ServerSock extends Sock {
     }
 
     /**
-     * @implNote fires all listeners, then sends an object to all clients
+     * Fires all listeners, then sends an object to all clients
      */
     @Override
     public void send(Object value) {
         getBus().fire(value);
         if (isConnected()) server.sendToAllTCP(value);
+    }
+
+    /**
+     * The ServerSock is always connected, even if {@link Sock#connect()} wasn't called before
+     */
+    public boolean isConnected() {
+        return super.isConnected();
     }
 
     public class ServerSockListener implements NetListener {
