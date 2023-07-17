@@ -10,6 +10,15 @@ public abstract class Sock {
     private final EventBus bus = new EventBus(this);
     private final PacketSerializer serializer = new PacketSerializer(this);
 
+    /** Creates a new instance of Sock
+     * @param port - the port to which this Sock will connect
+     * @param server - if true, creates ServerSock, otherwise ClientSock
+     * @return a new instance of Sock
+     */
+    public static Sock create(int port, boolean server) {
+        return server ? server(port) : client(port);
+    }
+
     /** Creates a new instance of ClientSock
      * @param port - the port to which this ClientSock will connect
      * @return a new instance of ClientSock
