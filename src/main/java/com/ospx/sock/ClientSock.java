@@ -41,9 +41,7 @@ public class ClientSock extends Sock {
             try {
                 if (!isConnected())
                     connect();
-            } catch (Throwable e) {
-                Log.err(e);
-            }
+            } catch (Throwable ignored) {}
         }, 5f, 1f);
 
         client.connect(5000, "localhost", port);

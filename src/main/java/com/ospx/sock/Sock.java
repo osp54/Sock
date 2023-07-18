@@ -13,8 +13,8 @@ public abstract class Sock {
     /**
      * Creates a new instance of Sock
      *
-     * @param port   - the port to which this Sock will connect
-     * @param server - if true, creates ServerSock, otherwise ClientSock
+     * @param port   the port to which this Sock will connect
+     * @param server if true, creates ServerSock, otherwise ClientSock
      * @return a new instance of Sock
      */
     public static Sock create(int port, boolean server) {
@@ -24,7 +24,7 @@ public abstract class Sock {
     /**
      * Creates a new instance of ClientSock
      *
-     * @param port - the port to which this ClientSock will connect
+     * @param port the port to which this ClientSock will connect
      * @return a new instance of ClientSock
      */
     public static ClientSock client(int port) {
@@ -34,7 +34,7 @@ public abstract class Sock {
     /**
      * Creates a new instance of ServerSock
      *
-     * @param port - the port on which this ServerSock will bind
+     * @param port the port on which this ServerSock will bind
      * @return a new instance of ServerSock
      */
     public static ServerSock server(int port) {
