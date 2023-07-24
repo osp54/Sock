@@ -47,8 +47,8 @@ public class ClientSock extends Sock {
             }
         });
 
-        client.connect(5000, "localhost", port);
         wasConnected = true;
+        client.connect(5000, "localhost", port);
     }
 
     /**
@@ -57,8 +57,8 @@ public class ClientSock extends Sock {
     @Override
     @SneakyThrows
     public void disconnect() {
-        client.close();
         wasConnected = false;
+        client.close();
     }
 
     /**
