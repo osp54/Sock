@@ -2,7 +2,6 @@ package com.ospx.sock;
 
 import arc.net.*;
 import arc.util.*;
-import arc.util.Timer.Task;
 import lombok.*;
 
 import java.nio.channels.ClosedSelectorException;
@@ -12,13 +11,24 @@ public class ClientSock extends Sock {
     private final Client client;
     private final int port;
 
-    private Task reconnectTask;
+    private boolean wasConnected;
 
     public ClientSock(int port) {
         this.client = new Client(32768, 16384, getSerializer());
         this.port = port;
 
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
+
+        Timer.schedule(() -> {
+            Log.info("[Sock Client] Trying to reconnect to Sock server...");
+
+            try {
+                if (wasConnected && !isConnected())
+                    connect();
+            } catch (Throwable e) {
+                Log.err(e);
+            }
+        }, 30f, 30f);
     }
 
     /**
@@ -37,14 +47,8 @@ public class ClientSock extends Sock {
             }
         });
 
-        reconnectTask = Timer.schedule(() -> {
-            try {
-                if (!isConnected())
-                    connect();
-            } catch (Throwable ignored) {}
-        }, 5f, 1f);
-
         client.connect(5000, "localhost", port);
+        wasConnected = true;
     }
 
     /**
@@ -54,7 +58,7 @@ public class ClientSock extends Sock {
     @SneakyThrows
     public void disconnect() {
         client.close();
-        if (reconnectTask != null) reconnectTask.cancel();
+        wasConnected = false;
     }
 
     /**
