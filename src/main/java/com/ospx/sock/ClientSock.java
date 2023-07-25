@@ -1,8 +1,14 @@
 package com.ospx.sock;
 
-import arc.net.*;
-import arc.util.*;
-import lombok.*;
+import arc.net.Client;
+import arc.net.Connection;
+import arc.net.DcReason;
+import arc.net.NetListener;
+import arc.util.Log;
+import arc.util.Threads;
+import arc.util.Timer;
+import lombok.Getter;
+import lombok.SneakyThrows;
 
 import java.nio.channels.ClosedSelectorException;
 
@@ -20,11 +26,12 @@ public class ClientSock extends Sock {
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
 
         Timer.schedule(() -> {
+            if (!wasConnected || isConnected()) return;
+
             Log.info("[Sock Client] Trying to reconnect to Sock server...");
 
             try {
-                if (wasConnected && !isConnected())
-                    connect();
+                connect();
             } catch (Throwable e) {
                 Log.err(e);
             }
