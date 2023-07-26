@@ -70,11 +70,16 @@ public class ServerSock extends Sock {
                 return;
             }
 
-            if (!connection.getRemoteAddressTCP().getAddress().isLoopbackAddress()) {
-                connection.close(DcReason.closed);
+            try {
+                if (!connection.getRemoteAddressTCP().getAddress().isLoopbackAddress()) {
+                    connection.close(DcReason.closed);
+                    return;
+                }
+            }catch (Exception e){
+                Log.debug("[Sock Server] Null address obtained");
+                Log.debug(e);
                 return;
             }
-
             Log.info("[Sock Server] Client @ has connected. (@)", connection.getID(), connection.getRemoteAddressTCP());
         }
 
