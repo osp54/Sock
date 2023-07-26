@@ -65,6 +65,11 @@ public class ServerSock extends Sock {
     public class ServerSockListener implements NetListener {
         @Override
         public void connected(Connection connection) {
+            if (connection == null) {
+                Log.debug("[Sock Server] Null connection obtained");
+                return;
+            }
+
             if (!connection.getRemoteAddressTCP().getAddress().isLoopbackAddress()) {
                 connection.close(DcReason.closed);
                 return;
