@@ -26,10 +26,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.anuken.arc:arc-core:v145")
-    compileOnly("com.github.anuken.arc:arcnet:v145")
+    implementation("com.github.anuken.arc:arc-core:v146")
+    implementation("com.github.anuken.arc:arcnet:v146")
 
-    implementation("com.alibaba:fastjson:2.0.32")
+    implementation("com.alibaba:fastjson:2.0.40")
 
     compileOnly("org.projectlombok:lombok:1.18.26")
     annotationProcessor("org.projectlombok:lombok:1.18.26")

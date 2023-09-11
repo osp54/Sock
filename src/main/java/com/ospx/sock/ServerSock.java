@@ -12,7 +12,7 @@ public class ServerSock extends Sock {
     public final int port;
 
     public ServerSock(int port) {
-        this.server = new Server(32768, 16384, getSerializer());
+        this.server = new Server(65536, 32768, getSerializer());
         this.port = port;
 
         this.server.addListener(new MainThreadListener(new ServerSockListener()));

@@ -20,7 +20,7 @@ public class ClientSock extends Sock {
     private boolean wasConnected;
 
     public ClientSock(int port) {
-        this.client = new Client(32768, 16384, getSerializer());
+        this.client = new Client(65536, 32768, getSerializer());
         this.port = port;
 
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
