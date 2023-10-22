@@ -20,7 +20,7 @@ public class ClientSock extends Sock {
     private boolean wasConnected;
 
     public ClientSock(int port) {
-        this.client = new Client(65536, 32768, getSerializer());
+        this.client = new Client(65536, 32768, serializer);
         this.port = port;
 
         this.client.addListener(new MainThreadListener(new ClientSockListener()));
@@ -73,7 +73,7 @@ public class ClientSock extends Sock {
      */
     @Override
     public void send(Object value) {
-        getBus().fire(value);
+        bus.fire(value);
         if (isConnected()) client.sendTCP(value);
     }
 
@@ -85,17 +85,23 @@ public class ClientSock extends Sock {
     public class ClientSockListener implements NetListener {
         @Override
         public void connected(Connection connection) {
-            Log.info("[Sock Client] Connected to server @. (@)", connection.getID(), connection.getRemoteAddressTCP());
+            client.sendTCP(new SockName(name));
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock Client] Disconnected from server @. (@)", connection.getID(), reason);
+            Log.info("[Sock Client] Disconnected from server @. (@)", connection, reason);
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            getBus().fire(object);
+            if (object instanceof SockName name) {
+                connection.setName(name.name());
+                Log.info("[Sock Client] Connected to server @. (@)", connection, connection.getRemoteAddressTCP());
+                return;
+            }
+
+            bus.fire(object);
         }
     }
 }

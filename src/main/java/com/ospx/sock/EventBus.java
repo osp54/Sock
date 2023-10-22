@@ -12,10 +12,10 @@ import java.util.UUID;
 @Getter
 @SuppressWarnings("unchecked")
 public class EventBus {
-    private final Sock sock;
+    protected final Sock sock;
 
-    private final ObjectMap<String, RequestSubscription<?>> requests = new ObjectMap<>();
-    private final ObjectMap<Class<?>, Seq<EventSubscription<?>>> events = new ObjectMap<>();
+    protected final ObjectMap<String, RequestSubscription<?>> requests = new ObjectMap<>();
+    protected final ObjectMap<Class<?>, Seq<EventSubscription<?>>> events = new ObjectMap<>();
 
     public EventBus(Sock sock) {
         this.sock = sock;

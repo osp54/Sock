@@ -2,13 +2,19 @@ package com.ospx.sock;
 
 import arc.func.Cons;
 import com.ospx.sock.EventBus.*;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 public abstract class Sock {
 
-    private final EventBus bus = new EventBus(this);
-    private final PacketSerializer serializer = new PacketSerializer(this);
+    protected final EventBus bus = new EventBus(this);
+    protected final PacketSerializer serializer = new PacketSerializer(this);
+
+    /**
+     *  The name of this Sock instance
+     */
+    @Setter
+    protected String name;
 
     /**
      * Creates a new instance of Sock

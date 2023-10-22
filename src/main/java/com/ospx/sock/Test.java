@@ -18,7 +18,10 @@ public class Test {
         app = new MockApplication();
 
         server = Sock.server(Mathf.random(9999));
+        server.setName("XCore");
+
         client = Sock.client(server.getPort());
+        client.setName("Darkdustry");
 
         server.connect();
         client.connect();

@@ -12,7 +12,7 @@ public class ServerSock extends Sock {
     public final int port;
 
     public ServerSock(int port) {
-        this.server = new Server(65536, 32768, getSerializer());
+        this.server = new Server(65536, 32768, serializer);
         this.port = port;
 
         this.server.addListener(new MainThreadListener(new ServerSockListener()));
@@ -51,7 +51,7 @@ public class ServerSock extends Sock {
      */
     @Override
     public void send(Object value) {
-        getBus().fire(value);
+        bus.fire(value);
         if (isConnected()) server.sendToAllTCP(value);
     }
 
@@ -75,22 +75,29 @@ public class ServerSock extends Sock {
                     connection.close(DcReason.closed);
                     return;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.debug("[Sock Server] Null address obtained");
                 Log.debug(e);
                 return;
             }
-            Log.info("[Sock Server] Client @ has connected. (@)", connection.getID(), connection.getRemoteAddressTCP());
+
+            server.sendToTCP(connection.getID(), new SockName(name));
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("[Sock Server] Client @ has disconnected. (@)", connection.getID(), reason);
+            Log.info("[Sock Server] Client @ has disconnected. (@)", connection, reason);
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            getBus().fire(object);
+            if (object instanceof SockName name) {
+                connection.setName(name.name());
+                Log.info("[Sock Server] Client @ has connected. (@)", connection, connection.getRemoteAddressTCP());
+                return;
+            }
+
+            bus.fire(object);
             server.sendToAllExceptTCP(connection.getID(), object);
         }
     }

@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 
 @Getter
 public class PacketSerializer implements NetSerializer {
-    private final Sock sock;
+    protected final Sock sock;
 
     public PacketSerializer(Sock sock) {
         this.sock = sock;
@@ -64,6 +64,9 @@ public class PacketSerializer implements NetSerializer {
         } else if (message instanceof RegisterUDP udp) {
             buffer.put((byte) 4);
             buffer.putInt(udp.connectionID);
+        } else if (message instanceof SockName name) {
+            buffer.put((byte) 5);
+            writeString(buffer, name.name());
         }
     }
 
@@ -84,6 +87,8 @@ public class PacketSerializer implements NetSerializer {
             case 4 -> new RegisterUDP() {{
                 this.connectionID = buffer.getInt();
             }};
+
+            case 5 -> new SockName(readString(buffer));
 
             default -> throw new IllegalStateException("Unexpected framework message!");
         };
